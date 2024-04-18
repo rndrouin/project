@@ -17,6 +17,18 @@ app.use(bodyParser.json());
 // Implementing a static file server
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Import the checkAPIKey middleware
+const checkAPIKey = require('./api-key-middleware');
+
+// Get the API key from the command line argument if it exists, fallback to environment variable
+const apiKey = process.argv[2] || process.env.API_KEY;
+
+// Check if the API key is set
+if (!apiKey) {
+  console.error('API Key is not set. Exiting...');
+  process.exit(1);
+}
+/*
 // Middleware function to check API key
 function checkAPIKey(req, res, next) {
   const apiKey = process.env.API_KEY;
@@ -34,6 +46,7 @@ function checkAPIKey(req, res, next) {
     next();
   }
 }
+*/
 
 // Adding an app.get() statement to retrieve customers from MongoDB
 app.get("/customers", checkAPIKey, async (req, res) => {
