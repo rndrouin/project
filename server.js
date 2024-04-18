@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const da = require("./data-access"); // Importing data-access.js
+require("dotenv").config();
 
 // Creating express app object
 const app = express();
@@ -16,8 +17,26 @@ app.use(bodyParser.json());
 // Implementing a static file server
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware function to check API key
+function checkAPIKey(req, res, next) {
+  const apiKey = process.env.API_KEY;
+  const requestAPIKey = req.headers['x-api-key'];
+
+  //attempted to troubleshoot
+  //console.log("apiKey:", apiKey);
+  //console.log("requestAPIKey:", requestAPIKey);
+
+  if (!requestAPIKey) {
+    res.status(401).send('API Key is missing');
+  } else if (requestAPIKey !== apiKey) {
+    res.status(403).send('API Key is invalid');
+  } else {
+    next();
+  }
+}
+
 // Adding an app.get() statement to retrieve customers from MongoDB
-app.get("/customers", async (req, res) => {
+app.get("/customers", checkAPIKey, async (req, res) => {
   const [cust, err] = await da.getCustomers(); // Calling the getCustomers() method from data-access.js
 
   if (cust !== null) {
@@ -28,7 +47,7 @@ app.get("/customers", async (req, res) => {
 });
 
 // Adding a GET handler for the "reset" path
-app.get("/reset", async (req, res) => {
+app.get("/reset", checkAPIKey, async (req, res) => {
   const [result, err] = await da.resetCustomers(); // Calling the resetCustomers() method from data-access.js
 
   if (result !== null) {
@@ -39,7 +58,7 @@ app.get("/reset", async (req, res) => {
 });
 
 // Adding a POST handler for the "customers" path
-app.post("/customers", async (req, res) => {
+app.post("/customers", checkAPIKey, async (req, res) => {
   const newCustomer = req.body;
 
   if (!newCustomer) {
@@ -58,7 +77,7 @@ app.post("/customers", async (req, res) => {
 });
 
 // Adding a GET handler for the "customers/:id" path
-app.get("/customers/:id", async (req, res) => {
+app.get("/customers/:id", checkAPIKey, async (req, res) => {
   const id = req.params.id;
   const [cust, err] = await da.getCustomerById(id);
   if (cust) {
@@ -69,7 +88,7 @@ app.get("/customers/:id", async (req, res) => {
 });
 
 // Adding a PUT handler for the "customers/:id" path
-app.put("/customers/:id", async (req, res) => {
+app.put("/customers/:id", checkAPIKey, async (req, res) => {
   const updatedCustomer = req.body;
   const id = req.params.id;
 
@@ -90,15 +109,14 @@ app.put("/customers/:id", async (req, res) => {
 });
 
 // Adding a DELETE handler for the "customers/:id" path
-app.delete("/customers/:id", async (req, res) => {
+app.delete("/customers/:id", checkAPIKey, async (req, res) => {
   const id = req.params.id;
-  // return array [message, errMessage]
   const [message, errMessage] = await da.deleteCustomerById(id);
+
   if (message) {
-      res.send(message);
+    res.send(message);
   } else {
-      res.status(404);
-      res.send(errMessage);
+    res.status(404).send(errMessage);
   }
 });
 
