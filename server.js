@@ -23,6 +23,17 @@ app.get("/customers", async (req, res) => {
   }
 });
 
+// Adding a GET handler for the "reset" path
+app.get("/reset", async (req, res) => {
+  const [result, err] = await da.resetCustomers(); // Calling the resetCustomers() method from data-access.js
+
+  if (result !== null) {
+    res.send(result);
+  } else {
+    res.status(500).send(err);
+  }
+});
+
 // Starting the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
