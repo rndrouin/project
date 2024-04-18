@@ -41,14 +41,14 @@ app.get("/reset", async (req, res) => {
 // Adding a POST handler for the "customers" path
 app.post("/customers", async (req, res) => {
   const newCustomer = req.body;
-  
+
   if (!newCustomer) {
     res.status(400).send("Missing request body");
     return;
   }
-  
+
   const [status, id, errMessage] = await da.addCustomer(newCustomer);
-  
+
   if (status === "success") {
     newCustomer._id = id;
     res.status(201).json(newCustomer);
@@ -72,20 +72,33 @@ app.get("/customers/:id", async (req, res) => {
 app.put("/customers/:id", async (req, res) => {
   const updatedCustomer = req.body;
   const id = req.params.id;
-  
+
   if (!updatedCustomer) {
     res.status(400).send("Missing request body");
     return;
   }
-  
+
   delete updatedCustomer._id;
-  
+
   const [message, errMessage] = await da.updateCustomer(updatedCustomer);
-  
+
   if (message) {
     res.send(message);
   } else {
     res.status(400).send(errMessage);
+  }
+});
+
+// Adding a DELETE handler for the "customers/:id" path
+app.delete("/customers/:id", async (req, res) => {
+  const id = req.params.id;
+  // return array [message, errMessage]
+  const [message, errMessage] = await da.deleteCustomerById(id);
+  if (message) {
+      res.send(message);
+  } else {
+      res.status(404);
+      res.send(errMessage);
   }
 });
 
