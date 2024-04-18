@@ -37,9 +37,10 @@ async function getCustomers() {
 // Function to retrieve a customer by ID from the database
 async function getCustomerById(id) {
     try {
-        const customer = await collection.findOne({ "id": +id });
-        if (!customer) {
-            return [null, "Invalid customer number"]; // Return array [customer, errMessage]
+        const customer = await collection.findOne({"id": +id});
+        // return array [customer, errMessage]
+        if(!customer){
+          return [ null, "invalid customer number"];
         }
         return [customer, null];
     } catch (err) {
@@ -117,7 +118,5 @@ module.exports = {
     getCustomers,
     resetCustomers,
     addCustomer,
-    getCustomerById,
-    updateCustomer,
-    deleteCustomerById
+    getCustomerById
 };

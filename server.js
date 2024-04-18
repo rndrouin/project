@@ -57,6 +57,18 @@ app.post("/customers", async (req, res) => {
   }
 });
 
+// Adding a GET handler for the "customers/:id" path
+app.get("/customers/:id", async (req, res) => {
+  const id = req.params.id;
+  const [cust, err] = await da.getCustomerById(id);
+  if(cust){
+      res.send(cust);
+  }else{
+      res.status(404);
+      res.send(err);
+  }   
+});
+
 // Starting the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
