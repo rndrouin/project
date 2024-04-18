@@ -61,12 +61,32 @@ app.post("/customers", async (req, res) => {
 app.get("/customers/:id", async (req, res) => {
   const id = req.params.id;
   const [cust, err] = await da.getCustomerById(id);
-  if(cust){
-      res.send(cust);
-  }else{
-      res.status(404);
-      res.send(err);
-  }   
+  if (cust) {
+    res.send(cust);
+  } else {
+    res.status(404).send(err);
+  }
+});
+
+// Adding a PUT handler for the "customers/:id" path
+app.put("/customers/:id", async (req, res) => {
+  const updatedCustomer = req.body;
+  const id = req.params.id;
+  
+  if (!updatedCustomer) {
+    res.status(400).send("Missing request body");
+    return;
+  }
+  
+  delete updatedCustomer._id;
+  
+  const [message, errMessage] = await da.updateCustomer(updatedCustomer);
+  
+  if (message) {
+    res.send(message);
+  } else {
+    res.status(400).send(errMessage);
+  }
 });
 
 // Starting the server
