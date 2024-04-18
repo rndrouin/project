@@ -14,8 +14,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Adding an app.get() statement to retrieve customers from MongoDB
 app.get("/customers", async (req, res) => {
-  const cust = await da.getCustomers(); // Calling the getCustomers() method from data-access.js
-  res.send(cust);
+  const [cust, err] = await da.getCustomers(); // Calling the getCustomers() method from data-access.js
+
+  if (cust !== null) {
+    res.send(cust);
+  } else {
+    res.status(500).send(err);
+  }
 });
 
 // Starting the server
