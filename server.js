@@ -18,35 +18,16 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Import the checkAPIKey middleware
-const checkAPIKey = require('./api-key-middleware');
+const { checkAPIKey } = require('./api-key-middleware');
 
 // Get the API key from the command line argument if it exists, fallback to environment variable
-const apiKey = process.argv[2] || process.env.API_KEY;
+const apiKey = process.argv.find(arg => arg.startsWith('--api-key='))?.split('=')[1] || process.env.API_KEY;
 
 // Check if the API key is set
 if (!apiKey) {
-  console.error('API Key is not set. Exiting...');
+  console.error('API Key is not set. Please provide a value through the API_KEY env var or --api-key cmd line parameter. Exiting...');
   process.exit(1);
 }
-/*
-// Middleware function to check API key
-function checkAPIKey(req, res, next) {
-  const apiKey = process.env.API_KEY;
-  const requestAPIKey = req.headers['x-api-key'];
-
-  //attempted to troubleshoot
-  //console.log("apiKey:", apiKey);
-  //console.log("requestAPIKey:", requestAPIKey);
-
-  if (!requestAPIKey) {
-    res.status(401).send('API Key is missing');
-  } else if (requestAPIKey !== apiKey) {
-    res.status(403).send('API Key is invalid');
-  } else {
-    next();
-  }
-}
-*/
 
 // Adding an app.get() statement to retrieve customers from MongoDB
 app.get("/customers", checkAPIKey, async (req, res) => {
